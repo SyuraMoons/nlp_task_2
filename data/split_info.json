@@ -1,0 +1,23 @@
+{
+  "train": {
+    "rows": 817,
+    "start": "2021-09-30",
+    "end": "2025-02-24",
+    "up_rate": 0.562,
+    "days_with_news": 684
+  },
+  "val": {
+    "rows": 175,
+    "start": "2025-02-25",
+    "end": "2025-11-24",
+    "up_rate": 0.531,
+    "days_with_news": 164
+  },
+  "test": {
+    "rows": 176,
+    "start": "2025-11-25",
+    "end": "2026-09-01",
+    "up_rate": 0.591,
+    "days_with_news": 176
+  }
+}
