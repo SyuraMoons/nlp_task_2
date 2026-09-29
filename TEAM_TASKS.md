@@ -4,7 +4,7 @@
 |---|---|---|---|
 | **A** (Harfi) | Repo setup, data split, evaluation, baseline + combined model pipeline, README | `data/`, `src/config.py`, `src/data/`, `src/models/`, `src/evaluation/`, `src/train.py` | ✅ done |
 | **B** | NLP feature extraction: preprocessing, lexicon sentiment, TF-IDF | `src/features/nlp_features.py` | ✅ done |
-| **C** | EDA + results notebooks, PDF report with pipeline diagram | `notebook/`, `report/` | ⬜ TODO |
+| **C** | EDA + results notebooks, PDF report with pipeline diagram | `notebook/`, `report/` | ✅ done |
 
 The pipeline already runs end to end. B's and C's parts plug into it, so nobody is blocked by anyone else. The one ordering rule: C should re-run the results notebook **after** B finishes.
 
@@ -65,8 +65,8 @@ Rules: **no pre-trained embeddings or transformers** (no FinBERT, IndoBERT, sent
 
 ## Before submitting (everyone)
 
-- [ ] `python -m src.train` runs without errors on a fresh clone
-- [ ] `results/` contains the final numbers (with B's features on)
-- [ ] both notebooks are run with outputs saved
-- [ ] the report PDF is in `report/`
+- [x] `python -m src.train` runs without errors on a fresh clone
+- [x] `results/` contains the final numbers (with B's features on)
+- [x] both notebooks are run with outputs saved
+- [x] the report PDF is in `report/`
 - [ ] **each member** submits on eLOK individually
