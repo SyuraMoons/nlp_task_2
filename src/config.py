@@ -42,8 +42,8 @@ SPLIT_RATIOS = {"train": 0.70, "val": 0.15, "test": 0.15}
 # corresponding functions are implemented.
 # ---------------------------------------------------------------------------
 NLP_CONFIG = {
-    "use_lexicon": False,         # InSet Indonesian sentiment lexicon on headlines
-    "use_tfidf": False,           # TF-IDF on headlines, reduced with TruncatedSVD
+    "use_lexicon": True,          # InSet Indonesian sentiment lexicon on headlines
+    "use_tfidf": True,            # TF-IDF on headlines, reduced with TruncatedSVD
     "tfidf_max_features": 5000,
     "tfidf_min_df": 5,
     "svd_components": 20,

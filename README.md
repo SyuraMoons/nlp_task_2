@@ -79,7 +79,7 @@ Hyper-parameters are chosen on validation. The best setting is refitted on train
 
 ## Current results (test set)
 
-The NLP features here are only the placeholder set (news volume + GDELT tone). Lexicon sentiment and TF-IDF are Person B's part and will update this table.
+The NLP features below include the full feature pipeline: news volume, GDELT tone, InSet Indonesian lexicon sentiment scoring, and TF-IDF with TruncatedSVD (20 components).
 
 | model | feature set | accuracy | macro-F1 | MCC | ROC-AUC |
 |---|---|---|---|---|---|
@@ -87,7 +87,7 @@ The NLP features here are only the placeholder set (news volume + GDELT tone). L
 | persistence | – | 0.545 | 0.532 | 0.064 | 0.532 |
 | logreg | market | 0.523 | 0.515 | 0.034 | 0.569 |
 | xgboost | market | 0.625 | 0.507 | 0.177 | 0.533 |
-| logreg | market+nlp | 0.506 | 0.505 | 0.057 | 0.577 |
-| xgboost | market+nlp | 0.608 | 0.521 | 0.129 | 0.571 |
+| logreg | market+nlp | 0.489 | 0.488 | -0.006 | 0.504 |
+| xgboost | market+nlp | 0.602 | 0.478 | 0.101 | 0.579 |
 
-The full table, including the `nlp`-only ablation, is in `results/results.md`. With only ~800 training days, the differences are small and noisy. That is expected for daily FX direction, and it's what Tasks 3–4 will test properly.
+The full table, including the `nlp`-only ablation, is in `results/results.md`. With ~817 training days, the differences are small and noisy. That is expected for daily FX direction, and it's what Tasks 3–4 will test properly.

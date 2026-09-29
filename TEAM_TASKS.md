@@ -3,7 +3,7 @@
 | Person | Part | Files | Status |
 |---|---|---|---|
 | **A** (Harfi) | Repo setup, data split, evaluation, baseline + combined model pipeline, README | `data/`, `src/config.py`, `src/data/`, `src/models/`, `src/evaluation/`, `src/train.py` | ✅ done |
-| **B** | NLP feature extraction: preprocessing, lexicon sentiment, TF-IDF | `src/features/nlp_features.py` | ⬜ TODO |
+| **B** | NLP feature extraction: preprocessing, lexicon sentiment, TF-IDF | `src/features/nlp_features.py` | ✅ done |
 | **C** | EDA + results notebooks, PDF report with pipeline diagram | `notebook/`, `report/` | ⬜ TODO |
 
 The pipeline already runs end to end. B's and C's parts plug into it, so nobody is blocked by anyone else. The one ordering rule: C should re-run the results notebook **after** B finishes.

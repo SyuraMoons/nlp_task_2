@@ -23,10 +23,18 @@ Status:
   [TODO] lexicon features      -- Person B, then set NLP_CONFIG["use_lexicon"] = True
   [TODO] TF-IDF + SVD features -- Person B, then set NLP_CONFIG["use_tfidf"] = True
 """
+import re
 import numpy as np
 import pandas as pd
+from sklearn.decomposition import TruncatedSVD
+from sklearn.feature_extraction.text import TfidfVectorizer
 
 from src.config import LEXICON_DIR, NLP_CONFIG, SEED
+
+INDONESIAN_STOPWORDS = {
+    "yang", "di", "dan", "ini", "itu", "untuk", "pada", "adalah",
+    "dengan", "akan", "juga", "oleh", "dalam", "bisa", "karena", "atau",
+}
 
 TITLE_SEP = " || "
 
@@ -57,13 +65,17 @@ def preprocess_title(title):
 
     Suggested steps (justify your choices in the report):
       1. lowercase
-      2. remove punctuation / digits (hint: re.sub(r"[^a-z\\s]", " ", text))
+      2. remove punctuation / digits (hint: re.sub(r"[^a-z\s]", " ", text))
       3. split on whitespace
       4. (optional) drop Indonesian stopwords, e.g. "yang", "di", "dan", "ke", "dari"
 
     Example: "Rupiah Melemah 0,5% ke Rp16.200!" -> ["rupiah", "melemah", "ke", "rp"]
     """
-    raise NotImplementedError("Person B: implement preprocess_title")
+    if not isinstance(title, str) or not title.strip():
+        return []
+    cleaned = re.sub(r"[^a-z\s]", " ", title.lower())
+    tokens = cleaned.split()
+    return [t for t in tokens if len(t) >= 2 and t not in INDONESIAN_STOPWORDS]
 
 
 class NLPFeatureExtractor:
@@ -94,7 +106,7 @@ class NLPFeatureExtractor:
         return self.fit(df).transform(df)
 
     # -----------------------------------------------------------------------
-    # TODO (Person B): lexicon-based sentiment (InSet)
+    # Person B: lexicon-based sentiment (InSet)
     # -----------------------------------------------------------------------
     def _load_lexicon(self):
         """Read the InSet lexicon into a dict {word: weight}.
@@ -102,11 +114,26 @@ class NLPFeatureExtractor:
         Files (download with the command in TEAM_TASKS.md):
             data/lexicon/positive.tsv, data/lexicon/negative.tsv
         Each has a header 'word<TAB>weight'; weights range -5..+5.
-        Hint: pd.read_csv(LEXICON_DIR / "positive.tsv", sep="\\t")
+        Hint: pd.read_csv(LEXICON_DIR / "positive.tsv", sep="\t")
         Note: a few entries are multi-word phrases -- keeping only single words
         is fine (say so in the report).
         """
-        raise NotImplementedError("Person B: implement _load_lexicon")
+        weights = {}
+        for filename in ["positive.tsv", "negative.tsv"]:
+            path = LEXICON_DIR / filename
+            if not path.exists():
+                raise FileNotFoundError(f"Lexicon file missing: {path}. Run curl commands in TEAM_TASKS.md.")
+            df = pd.read_csv(path, sep="\t")
+            for _, row in df.iterrows():
+                w = str(row["word"]).strip().lower()
+                if " " in w or "(" in w:
+                    continue
+                try:
+                    wt = float(row["weight"])
+                    weights.setdefault(w, []).append(wt)
+                except (ValueError, TypeError):
+                    continue
+        return {w: float(np.mean(wts)) for w, wts in weights.items()}
 
     def _lexicon_features(self, df):
         """One row per day. Suggested columns:
@@ -117,28 +144,62 @@ class NLPFeatureExtractor:
         Days with no headlines -> 0 for every column.
         Must return a DataFrame with index=df.index.
         """
-        raise NotImplementedError("Person B: implement _lexicon_features")
+        if self.lexicon is None:
+            self.lexicon = self._load_lexicon()
+
+        rows = []
+        for titles_cell in df["titles"]:
+            titles = split_titles(titles_cell)
+            if not titles:
+                rows.append((0.0, 0.0, 0.0))
+                continue
+            scores = []
+            for t in titles:
+                toks = preprocess_title(t)
+                score = sum(self.lexicon.get(tok, 0.0) for tok in toks)
+                scores.append(score)
+            mean_score = float(np.mean(scores)) if scores else 0.0
+            pos_share = float(np.mean([1.0 if s > 0 else 0.0 for s in scores])) if scores else 0.0
+            neg_share = float(np.mean([1.0 if s < 0 else 0.0 for s in scores])) if scores else 0.0
+            rows.append((mean_score, pos_share, neg_share))
+
+        return pd.DataFrame(
+            rows,
+            columns=["lex_score_mean", "lex_pos_share", "lex_neg_share"],
+            index=df.index,
+        )
 
     # -----------------------------------------------------------------------
-    # TODO (Person B): TF-IDF + dimensionality reduction
+    # Person B: TF-IDF + dimensionality reduction
     # -----------------------------------------------------------------------
     def _fit_tfidf(self, df):
         """Fit on the TRAIN split only (this method only ever receives train).
 
         One document per trading day = all that day's headlines joined.
-            from sklearn.feature_extraction.text import TfidfVectorizer
-            from sklearn.decomposition import TruncatedSVD
-            self.vectorizer = TfidfVectorizer(
-                tokenizer=..., lowercase=False,          # reuse preprocess_title
-                max_features=self.config["tfidf_max_features"],
-                min_df=self.config["tfidf_min_df"])
-            X = self.vectorizer.fit_transform(docs)
-            self.svd = TruncatedSVD(self.config["svd_components"], random_state=SEED).fit(X)
         """
-        raise NotImplementedError("Person B: implement _fit_tfidf")
+        docs = df["titles"].fillna("").tolist()
+        self.vectorizer = TfidfVectorizer(
+            tokenizer=preprocess_title,
+            lowercase=False,
+            token_pattern=None,
+            max_features=self.config["tfidf_max_features"],
+            min_df=self.config["tfidf_min_df"],
+        )
+        X = self.vectorizer.fit_transform(docs)
+        self.svd = TruncatedSVD(
+            n_components=self.config["svd_components"],
+            random_state=SEED,
+        ).fit(X)
+        return self
 
     def _tfidf_features(self, df):
         """transform() with the already-fitted vectorizer + SVD (never refit here).
         Return a DataFrame with columns tfidf_svd_0 .. tfidf_svd_{k-1}, index=df.index.
         """
-        raise NotImplementedError("Person B: implement _tfidf_features")
+        if self.vectorizer is None or self.svd is None:
+            raise RuntimeError("TF-IDF vectorizer and SVD must be fitted before transforming.")
+        docs = df["titles"].fillna("").tolist()
+        X = self.vectorizer.transform(docs)
+        X_svd = self.svd.transform(X)
+        cols = [f"tfidf_svd_{i}" for i in range(self.config["svd_components"])]
+        return pd.DataFrame(X_svd, columns=cols, index=df.index)
