@@ -2,9 +2,9 @@
 
 | Person | Part | Files | Status |
 |---|---|---|---|
-| **A** (Harfi) | Repo setup, data split, evaluation, baseline + combined model pipeline, README | `data/`, `src/config.py`, `src/data/`, `src/models/`, `src/evaluation/`, `src/train.py` | ✅ done |
-| **B** | NLP feature extraction: preprocessing, lexicon sentiment, TF-IDF | `src/features/nlp_features.py` | ✅ done |
-| **C** | EDA + results notebooks, PDF report with pipeline diagram | `notebook/`, `report/` | ✅ done |
+| **Muhammad Harfi** | Repo setup, data split, evaluation, baseline + combined model pipeline, README | `data/`, `src/config.py`, `src/data/`, `src/models/`, `src/evaluation/`, `src/train.py` | ✅ done |
+| **Yusuf Imantaka** | NLP feature extraction: preprocessing, lexicon sentiment, TF-IDF | `src/features/nlp_features.py` | ✅ done |
+| **Aufa Sultan** | EDA + results notebooks, PDF report with pipeline diagram | `notebook/`, `report/` | ✅ done |
 
 The pipeline already runs end to end. B's and C's parts plug into it, so nobody is blocked by anyone else. The one ordering rule: C should re-run the results notebook **after** B finishes.
 
@@ -22,7 +22,7 @@ Always run commands from the repo root. Work on your own branch (`git checkout -
 
 ---
 
-## Person B: NLP features
+## Yusuf Imantaka: NLP features
 
 Everything happens in **one file**: `src/features/nlp_features.py`. Each function you need to write has a `TODO` and a docstring that says exactly what to return.
 
@@ -54,7 +54,7 @@ Rules: **no pre-trained embeddings or transformers** (no FinBERT, IndoBERT, sent
 
 ---
 
-## Person C: notebooks + report
+## Aufa Sultan: notebooks + report
 
 1. **`notebook/01_eda.ipynb`**: the first cell already loads the data. Fill in the 6 `TODO` sections (each is one plot or table) and write 2–3 sentences under each. These sentences are reused in the report.
 2. **`notebook/02_results.ipynb`**: run it after `python -m src.train`, fill in the 4 `TODO`s, and re-run it once B's features are turned on.

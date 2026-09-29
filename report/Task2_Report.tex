@@ -41,7 +41,7 @@
     citecolor=ugmblue,
     urlcolor=primary,
     pdftitle={Task 2: Pipeline Proposal and Baseline Experimentation},
-    pdfauthor={NLP Project Team},
+    pdfauthor={Muhammad Harfi, Yusuf Imantaka, Aufa Sultan},
 }
 
 \pagestyle{fancy}
@@ -54,7 +54,7 @@
 \title{\vspace{-1.2cm}\textbf{\Large Global Geopolitical Event Prediction: Analyzing Impact on Dollar Exchange Rates}\\[0.25em]
 \large\textbf{Task 2: Pipeline Proposal and Baseline Experimentation}\\[0.2em]
 \normalsize Natural Language Processing Course Project}
-\author{\textbf{Team Members:} Harfi, Person B, Person C \\
+\author{\textbf{Team Members:} Muhammad Harfi, Yusuf Imantaka, Aufa Sultan \\
 Department of Computer Science and Electronics, Universitas Gadjah Mada}
 \date{September 2026}
 
@@ -210,64 +210,7 @@ Figure~\ref{fig:pipeline} provides the comprehensive architecture of our propose
 
 \begin{figure}[t]
 \centering
-\resizebox{0.92\linewidth}{!}{%
-\begin{tikzpicture}[
-    node distance=0.65cm and 0.9cm,
-    box/.style={rectangle, draw=darkgray, fill=white, rounded corners=3pt, thick, align=center, font=\scriptsize, inner sep=4pt},
-    databox/.style={rectangle, draw=primary, fill=primary!10, rounded corners=3pt, thick, align=center, font=\scriptsize, inner sep=4pt},
-    splitbox/.style={rectangle, draw=ugmblue, fill=ugmblue!10, rounded corners=3pt, thick, align=center, font=\scriptsize, inner sep=4pt},
-    feabox/.style={rectangle, draw=secondary, fill=secondary!15, rounded corners=3pt, thick, align=center, font=\scriptsize, inner sep=4pt},
-    modelbox/.style={rectangle, draw=accent, fill=accent!15, rounded corners=3pt, thick, align=center, font=\scriptsize, inner sep=4pt},
-    evalbox/.style={rectangle, draw=red!70!black, fill=red!10, rounded corners=3pt, thick, align=center, font=\scriptsize, inner sep=5pt},
-    arrow/.style={-{Stealth[length=2.5mm]}, thick, darkgray},
-    darrow/.style={-{Stealth[length=2.5mm]}, thick, dashed, darkgray}
-]
-
-% Data Stage
-\node[databox] (raw) {\textbf{Task 1 Dataset (\texttt{final\_dataset.csv})}\\[0.15em] Daily JISDOR Fixing Rates + Aligned News Headlines};
-\node[box, below=0.45cm of raw] (splitfunc) {\textbf{Data Preprocessing \& Lag Generation}\\[0.15em] Target: $y_t \in \{0, 1\}$ (UP/DOWN)\\[0.1em] Past Market Lags ($t-1$ to $t-5$, rolling 5d/20d)};
-
-% Splits
-\node[splitbox, below left=0.6cm and 0.8cm of splitfunc] (train) {\textbf{Train Split (70\%)}\\[0.1em] 817 days (2021-09 $\rightarrow$ 2025-02)\\[0.1em] 56.2\% UP};
-\node[splitbox, below=0.6cm of splitfunc] (val) {\textbf{Val Split (15\%)}\\[0.1em] 175 days (2025-02 $\rightarrow$ 2025-11)\\[0.1em] 53.1\% UP};
-\node[splitbox, below right=0.6cm and 0.8cm of splitfunc] (test) {\textbf{Test Split (15\%)}\\[0.1em] 176 days (2025-11 $\rightarrow$ 2026-09)\\[0.1em] 59.1\% UP};
-
-% Feature extraction
-\node[feabox, below=0.8cm of train] (fe_mkt) {\textbf{Market Features (8)}\\[0.1em] Return lags 1--5, rolling mean/std,\\[0.1em] 5-day up-ratio, calendar gap};
-\node[feabox, below=0.8cm of val] (fe_nlp) {\textbf{NLP Features (27)}\\[0.1em] 1. Preprocessed Titles (Cleaned)\\[0.1em] 2. InSet Lexicon (Mean, Pos/Neg Share)\\[0.1em] 3. TF-IDF + TruncatedSVD (20 dims)\\[0.1em] 4. Volume \& GDELT Metadata};
-
-% Models
-\node[modelbox, below=0.8cm of fe_mkt] (m_base) {\textbf{Baseline Models}\\[0.1em] Logistic Regression\\[0.1em] XGBoost\\[0.1em] (\textit{Market Only})};
-\node[modelbox, below=0.8cm of fe_nlp] (m_comb) {\textbf{Combined Models}\\[0.1em] Logistic Regression\\[0.1em] XGBoost\\[0.1em] (\textit{Market + NLP})};
-\node[modelbox, right=0.45cm of m_comb] (m_naive) {\textbf{Naive Baselines}\\[0.1em] Majority Class\\[0.1em] Persistence};
-
-% Evaluation
-\node[evalbox, below=0.7cm of $(m_base)!0.5!(m_comb)$] (eval) {\textbf{Unified Evaluation Protocol}\\[0.2em] \textbf{1. Hyperparameter Tuning on Validation Split} (Optimize MCC)\\[0.1em] \textbf{2. Refit Selected Parameters on Combined Train + Validation}\\[0.1em] \textbf{3. Single Unseen Evaluation on Test Split} (MCC, Macro-F1, Accuracy, ROC-AUC)};
-
-% Connectors
-\draw[arrow] (raw) -- (splitfunc);
-\draw[arrow] (splitfunc) -- (train);
-\draw[arrow] (splitfunc) -- (val);
-\draw[arrow] (splitfunc) -- (test);
-
-\draw[arrow] (train) -- (fe_mkt);
-\draw[arrow] (val) -- (fe_mkt);
-\draw[arrow] (test) -- (fe_mkt);
-
-\draw[arrow] (train) -- node[left, font=\tiny, align=right] {Fit Lexicon/\\TF-IDF/SVD} (fe_nlp);
-\draw[darrow] (val) -- (fe_nlp);
-\draw[darrow] (test) -- (fe_nlp);
-
-\draw[arrow] (fe_mkt) -- (m_base);
-\draw[arrow] (fe_mkt) -- (m_comb);
-\draw[arrow] (fe_nlp) -- (m_comb);
-
-\draw[arrow] (m_base) -- (eval);
-\draw[arrow] (m_comb) -- (eval);
-\draw[arrow] (m_naive) |- (eval);
-
-\end{tikzpicture}%
-}
+\includegraphics[width=0.88\linewidth]{figures/pipeline_diagram.pdf}
 \caption{Detailed End-to-End Pipeline Architecture for Task 2. The pipeline enforces zero look-ahead bias by chronologically separating partitions, fitting text vectorizers strictly on training data, and evaluating all models under identical validation-tuning and single-pass test protocols.}
 \label{fig:pipeline}
 \end{figure}
